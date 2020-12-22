@@ -161,6 +161,7 @@ def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
                 
         return total_loss / total_step, total_bleu_4 / total_step
 
+
 def save_checkpoint(filename, encoder, decoder, optimizer, total_loss, epoch, train_step=1):
     """Save the following to filename at checkpoints: encoder, decoder,
     optimizer, total_loss, epoch, and train_step."""

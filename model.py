@@ -89,5 +89,3 @@ class DecoderRNN(nn.Module):
             ordered = sorted(all_candidates, key=lambda x: x[1], reverse=True)
             idx_sequences = ordered[:beam_width]
         return [idx_seq[0] for idx_seq in idx_sequences]
-
-    
