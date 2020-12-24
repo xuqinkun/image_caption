@@ -9,7 +9,8 @@ class EncoderCNN(nn.Module):
         """Load the pretrained ResNet-50 and replace top fc layer."""
         super(EncoderCNN, self).__init__()
         resnet = models.resnet50(pretrained=True)
-        modules = list(resnet.children())[:-1] 
+        # Remove the final fully-connected layer
+        modules = list(resnet.children())[:-1]
         self.resnet = nn.Sequential(*modules)
         self.embed = nn.Linear(resnet.fc.in_features, embed_size)
         self.bn = nn.BatchNorm1d(embed_size, momentum=0.01)
@@ -34,7 +35,7 @@ class DecoderRNN(nn.Module):
 
     def forward(self, features, captions):
         """Decode image feature vectors and generates captions."""
-        captions = captions[:,:-1]
+        captions = captions[:, :-1]
         embeddings = self.embed(captions)
         inputs = torch.cat((features.unsqueeze(1), embeddings), 1)
         hiddens, _ = self.lstm(inputs)

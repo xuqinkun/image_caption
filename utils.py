@@ -1,10 +1,11 @@
-import torch
-import torch.utils.data as data
+import os
+import sys
+import time
+
 import matplotlib.pyplot as plt
 import numpy as np
-import sys
-import os
-import time
+import torch
+import torch.utils.data as data
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 
 # Determine how often to print the batch loss while training/validating. 
@@ -13,7 +14,7 @@ PRINT_EVERY = 100
 
 
 def train_one(train_loader, encoder, decoder, criterion, optimizer, vocab_size,
-          epoch, total_step, start_step=1, start_loss=0.0):
+              epoch, total_step, start_step=1, start_loss=0.0):
     """Train the model for one epoch using the provided parameters. Save 
     checkpoints every 100 steps. Return the epoch's average train loss."""
 
@@ -37,8 +38,8 @@ def train_one(train_loader, encoder, decoder, criterion, optimizer, vocab_size,
         # Obtain the batch
         for batch in train_loader:
             images, captions = batch[0], batch[1]
-            break 
-        # Move to GPU if CUDA is available
+            break
+            # Move to GPU if CUDA is available
         if torch.cuda.is_available():
             images = images.cuda()
             captions = captions.cuda()
@@ -73,11 +74,11 @@ def train_one(train_loader, encoder, decoder, criterion, optimizer, vocab_size,
             filename = os.path.join("./models", "train-model-{}{}.pkl".format(epoch, i_step))
             save_checkpoint(filename, encoder, decoder, optimizer, total_loss, epoch, i_step)
             start_train_time = time.time()
-            
+
     return total_loss / total_step
 
 
-def validate(val_loader, encoder, decoder, criterion, vocab, epoch, 
+def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
              total_step, start_step=1, start_loss=0.0, start_bleu=0.0):
     """Validate the model for one epoch using the provided parameters. 
     Return the epoch's average validation loss and Bleu-4 score."""
@@ -108,13 +109,13 @@ def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
             # Obtain the batch
             for batch in val_loader:
                 images, captions = batch[0], batch[1]
-                break 
+                break
 
-            # Move to GPU if CUDA is available
+                # Move to GPU if CUDA is available
             if torch.cuda.is_available():
                 images = images.cuda()
                 captions = captions.cuda()
-            
+
             # Pass the inputs through the CNN-RNN model
             features = encoder(images)
             outputs = decoder(features, captions)
@@ -134,15 +135,15 @@ def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
                 predicted_word_list = word_list(predicted_ids, vocab)
                 caption_word_list = word_list(captions[i].numpy(), vocab)
                 # Calculate Bleu-4 score and append it to the batch_bleu_4 list
-                batch_bleu_4 += sentence_bleu([caption_word_list], 
-                                               predicted_word_list, 
-                                               smoothing_function=smoothing.method1)
+                batch_bleu_4 += sentence_bleu([caption_word_list],
+                                              predicted_word_list,
+                                              smoothing_function=smoothing.method1)
             total_bleu_4 += batch_bleu_4 / len(outputs)
 
             # Calculate the batch loss
             loss = criterion(outputs.view(-1, len(vocab)), captions.view(-1))
             total_loss += loss.item()
-            
+
             # Get validation statistics
             stats = "Epoch %d, Val step [%d/%d], %ds, Loss: %.4f, Perplexity: %5.4f, Bleu-4: %.4f" \
                     % (epoch, i_step, total_step, time.time() - start_val_time,
@@ -158,7 +159,7 @@ def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
                 filename = os.path.join("./models", "val-model-{}{}.pkl".format(epoch, i_step))
                 save_val_checkpoint(filename, encoder, decoder, total_loss, total_bleu_4, epoch, i_step)
                 start_val_time = time.time()
-                
+
         return total_loss / total_step, total_bleu_4 / total_step
 
 
@@ -167,14 +168,15 @@ def save_checkpoint(filename, encoder, decoder, optimizer, total_loss, epoch, tr
     optimizer, total_loss, epoch, and train_step."""
     torch.save({"encoder": encoder.state_dict(),
                 "decoder": decoder.state_dict(),
-                "optimizer" : optimizer.state_dict(),
+                "optimizer": optimizer.state_dict(),
                 "total_loss": total_loss,
                 "epoch": epoch,
                 "train_step": train_step,
-               }, filename)
+                }, filename)
+
 
 def save_val_checkpoint(filename, encoder, decoder, total_loss,
-    total_bleu_4, epoch, val_step=1):
+                        total_bleu_4, epoch, val_step=1):
     """Save the following to filename at checkpoints: encoder, decoder,
     total_loss, total_bleu_4, epoch, and val_step"""
     torch.save({"encoder": encoder.state_dict(),
@@ -183,9 +185,10 @@ def save_val_checkpoint(filename, encoder, decoder, total_loss,
                 "total_bleu_4": total_bleu_4,
                 "epoch": epoch,
                 "val_step": val_step,
-               }, filename)
+                }, filename)
 
-def save_epoch(filename, encoder, decoder, optimizer, train_losses, val_losses, 
+
+def save_epoch(filename, encoder, decoder, optimizer, train_losses, val_losses,
                val_bleu, val_bleus, epoch):
     """Save at the end of an epoch. Save the model's weights along with the 
     entire history of train and validation losses and validation bleus up to 
@@ -198,7 +201,8 @@ def save_epoch(filename, encoder, decoder, optimizer, train_losses, val_losses,
                 "val_bleu": val_bleu,
                 "val_bleus": val_bleus,
                 "epoch": epoch
-               }, filename)
+                }, filename)
+
 
 def early_stopping(val_bleus, patience=3):
     """Check if the validation Bleu-4 scores no longer improve for 3 
@@ -221,6 +225,7 @@ def early_stopping(val_bleus, patience=3):
     # If none of recent Bleu scores is greater than max_bleu, it has converged
     return True
 
+
 def word_list(word_idx_list, vocab):
     """Take a list of word ids and a vocabulary from a dataset as inputs
     and return the corresponding words as a list.
@@ -234,6 +239,7 @@ def word_list(word_idx_list, vocab):
         if word != vocab.start_word:
             word_list.append(word)
     return word_list
+
 
 def clean_sentence(word_idx_list, vocab):
     """Take a list of word ids and a vocabulary from a dataset as inputs
@@ -250,6 +256,7 @@ def clean_sentence(word_idx_list, vocab):
     sentence = " ".join(sentence)
     return sentence
 
+
 def get_prediction(data_loader, encoder, decoder, vocab):
     """Loop over images in a dataset and print model's top three predicted 
     captions using beam search."""
@@ -260,15 +267,15 @@ def get_prediction(data_loader, encoder, decoder, vocab):
     if torch.cuda.is_available():
         image = image.cuda()
     features = encoder(image).unsqueeze(1)
-    print ("Caption without beam search:")
+    print("Caption without beam search:")
     output = decoder.sample(features)
     sentence = clean_sentence(output, vocab)
-    print (sentence)
+    print(sentence)
 
-    print ("Top captions using beam search:")
+    print("Top captions using beam search:")
     outputs = decoder.sample_beam_search(features)
     # Print maximum the top 3 predictions
     num_sents = min(len(outputs), 3)
     for output in outputs[:num_sents]:
         sentence = clean_sentence(output, vocab)
-        print (sentence)
+        print(sentence)
