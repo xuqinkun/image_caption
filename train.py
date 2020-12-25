@@ -12,7 +12,7 @@ from utils import train_one, validate, save_epoch, early_stopping
 
 
 def train(batch_size=32, vocab_threshold=5, vocab_from_file=True,
-          embed_size=256, hidden_size=512, num_epochs=10, cocoapi_dir="/Users/xqk/Tools/Coco/"):
+          embed_size=256, hidden_size=512, num_epochs=10, latest_model=None, cocoapi_dir="/Users/xqk/Tools/Coco/"):
     # Keep track of train and validation losses and validation Bleu-4 scores by epoch
     train_losses = []
     val_losses = []
@@ -55,8 +55,19 @@ def train(batch_size=32, vocab_threshold=5, vocab_from_file=True,
     vocab_size = len(train_loader.dataset.vocab)
 
     # Initialize the encoder and decoder
+    checkpoint = None
+    if latest_model:
+        checkpoint = torch.load(latest_model)
+    start_epoch = 1
+    if checkpoint:
+        train_losses = checkpoint['train_losses']
+        val_losses = checkpoint['val_losses']
+        start_epoch = checkpoint['epoch']
     encoder = EncoderCNN(embed_size)
     decoder = DecoderRNN(embed_size, hidden_size, vocab_size)
+    if checkpoint:
+        encoder.load_state_dict(checkpoint['encoder'])
+        decoder.load_state_dict(checkpoint['decoder'])
 
     # Move models to GPU if CUDA is available
     if torch.cuda.is_available():
@@ -71,13 +82,15 @@ def train(batch_size=32, vocab_threshold=5, vocab_from_file=True,
 
     # Define the optimizer
     optimizer = torch.optim.Adam(params=params, lr=0.001)
+    if checkpoint:
+        optimizer.load_state_dict(checkpoint['optimizer'])
 
     # Set the total number of training and validation steps per epoch
     total_train_step = math.ceil(len(train_loader.dataset.caption_lengths) / train_loader.batch_sampler.batch_size)
     total_val_step = math.ceil(len(val_loader.dataset.caption_lengths) / val_loader.batch_sampler.batch_size)
 
     start_time = time.time()
-    for epoch in range(1, num_epochs + 1):
+    for epoch in range(start_epoch, num_epochs + 1):
         train_loss = train_one(train_loader, encoder, decoder, loss, optimizer,
                            vocab_size, epoch, total_train_step)
         train_losses.append(train_loss)
