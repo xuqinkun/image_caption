@@ -18,6 +18,8 @@ def latest_model_dir(model_dir):
         exit(1)
     files = os.listdir(model_dir)
     files = [int(re.findall('model-(.*).pkl', file)[0]) for file in files if file.startswith("model")]
+    if len(files) == 0:
+        return None
     files = sorted(files)
     return os.path.join(model_dir, 'model-{}.pkl'.format(files[-1]))
 
