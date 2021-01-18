@@ -22,11 +22,11 @@ def train(batch_size=32, vocab_threshold=5, vocab_from_file=True,
 
     # Define a transform to pre-process the training images
     transform_train = transforms.Compose([
-        transforms.Resize(256),  # smaller edge of image resized to 256
-        transforms.RandomCrop(224),  # get 224x224 crop from random location
-        transforms.RandomHorizontalFlip(),  # horizontally flip image with probability=0.5
-        transforms.ToTensor(),  # convert the PIL Image to a tensor
-        transforms.Normalize((0.485, 0.456, 0.406),  # normalize image for pre-trained model
+        transforms.Resize(256),
+        transforms.RandomCrop(224),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize((0.485, 0.456, 0.406),
                              (0.229, 0.224, 0.225))])
 
     # Define a transform to pre-process the validation images

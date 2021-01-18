@@ -75,18 +75,4 @@ if __name__ == '__main__':
     # Obtain the embedded image features.
     features = encoder(image).unsqueeze(1)
 
-    # Pass the embedded image features through the model to get a predicted caption.
-    output = decoder.sample(features)
-    print('example output:', output)
-
-    assert (type(output) == list), "Output needs to be a Python list"
-    assert all([type(x) == int for x in output]), "Output should be a list of integers."
-    assert all([x in data_loader.dataset.vocab.idx2word for x in
-                output]), "Each entry in the output needs to correspond to an integer that indicates a token in the vocabulary."
-
-    sentence = clean_sentence(output, vocab)
-    print('example sentence:', sentence)
-
-    assert type(sentence) == str, 'Sentence needs to be a Python string!'
-
     get_prediction(data_loader, encoder, decoder, vocab)
