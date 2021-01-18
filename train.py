@@ -71,6 +71,7 @@ def train(batch_size=32, vocab_threshold=5, vocab_from_file=True,
 
     # Move models to GPU if CUDA is available
     if torch.cuda.is_available():
+        torch.cuda.set_device(1)
         encoder.cuda()
         decoder.cuda()
 

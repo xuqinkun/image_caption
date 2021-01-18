@@ -133,7 +133,7 @@ def validate(val_loader, encoder, decoder, criterion, vocab, epoch,
                     predicted_ids.append(scores.argmax().item())
                 # Convert word ids to actual words
                 predicted_word_list = word_list(predicted_ids, vocab)
-                caption_word_list = word_list(torch.Tensor.cpu(captions[i].numpy()), vocab)
+                caption_word_list = word_list(torch.Tensor.cpu(captions[i]).numpy(), vocab)
                 # Calculate Bleu-4 score and append it to the batch_bleu_4 list
                 batch_bleu_4 += sentence_bleu([caption_word_list],
                                               predicted_word_list,
