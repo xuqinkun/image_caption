@@ -188,8 +188,7 @@ def save_val_checkpoint(filename, encoder, decoder, total_loss,
                 }, filename)
 
 
-def save_epoch(filename, encoder, decoder, optimizer, train_losses, val_losses,
-               val_bleu, val_bleus, epoch):
+def save_epoch(filename, encoder, decoder, optimizer, train_losses, epoch):
     """Save at the end of an epoch. Save the model's weights along with the 
     entire history of train and validation losses and validation bleus up to 
     now, and the best Bleu-4."""
@@ -197,9 +196,6 @@ def save_epoch(filename, encoder, decoder, optimizer, train_losses, val_losses,
                 "decoder": decoder.state_dict(),
                 "optimizer": optimizer.state_dict(),
                 "train_losses": train_losses,
-                "val_losses": val_losses,
-                "val_bleu": val_bleu,
-                "val_bleus": val_bleus,
                 "epoch": epoch
                 }, filename)
 
