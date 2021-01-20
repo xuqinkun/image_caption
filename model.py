@@ -1,7 +1,5 @@
 import torch
 import torch.nn as nn
-import torchvision.models as models
-from torch.nn import functional as F
 
 
 def vgg_block(num_convs, in_channels, out_channels):
@@ -35,8 +33,7 @@ def vgg(conv_arch):
 class EncoderCNN(nn.Module):
     def __init__(self, embed_size):
         super(EncoderCNN, self).__init__()
-        # Remove the final fully-connected layer
-        conv_arch = ((1, 64), (1, 128), (2, 256), (2, 512), (2, 512))
+        conv_arch = ((2, 64), (2, 128), (4, 256), (4, 512), (4, 512))
         self.vgg = vgg(conv_arch)
         self.embed = nn.Linear(2048, embed_size)
         self.bn = nn.BatchNorm1d(embed_size, momentum=0.01)

@@ -47,7 +47,7 @@ if __name__ == '__main__':
     transformed_image = transformed_image.transpose((1, 2, 0))
 
     # Load the most recent checkpoint
-    checkpoint = torch.load(model_dir)
+    checkpoint = torch.load(model_dir, map_location=torch.device('cpu'))
 
     # Specify values for embed_size and hidden_size - we use the same values as in training step
     embed_size = 256
